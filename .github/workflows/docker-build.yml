@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # Necessary to push to the GitHub Container Registry (GHCR)
+      packages: write
 
     steps:
       - name: Checkout repository
@@ -31,15 +31,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          # Define the target repository name on GHCR
           images: ghcr.io/${{ github.repository }}
           
-          # This section is CORRECTLY FORMATTED:
-          tags: | # <-- The literal block scalar
+          # CRITICAL FIX: Removed comments inside the block scalar (|) for clean parsing.
+          tags: | 
             type=sha,prefix=,suffix=,format=short
-            # Tag with the branch name (e.g., 'main')
             type=branch,enable=${{ github.ref == 'refs/heads/main' }},priority=700,event=push
-            # Tag with 'latest' for the main branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
