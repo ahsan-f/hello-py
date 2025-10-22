@@ -1,9 +1,9 @@
-name: Docker Image CI
+name: Build and Push Docker Image to GHCR
 
 on:
   push:
     branches: [ main ]
-  # Allows you to run this workflow manually from the Actions tab
+  # Allows manual triggering
   workflow_dispatch:
 
 jobs:
@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # Needed to push to GHCR
+      packages: write # Necessary to push to the GitHub Container Registry (GHCR)
 
     steps:
       - name: Checkout repository
@@ -31,10 +31,15 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          # Define the target repository name on GHCR
           images: ghcr.io/${{ github.repository }}
+          
+          # Correct formatting for multiline tags using the YAML literal block scalar (|)
           tags: |
             type=sha,prefix=,suffix=,format=short
+            # Tag with the branch name (e.g., 'main')
             type=branch,enable=${{ github.ref == 'refs/heads/main' }},priority=700,event=push
+            # Tag with 'latest' for the main branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
