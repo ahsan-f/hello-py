@@ -3,7 +3,6 @@ name: Build and Push Docker Image to GHCR
 on:
   push:
     branches: [ main ]
-  # Allows manual triggering
   workflow_dispatch:
 
 jobs:
@@ -11,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: write # Necessary to push to the GitHub Container Registry (GHCR)
 
     steps:
       - name: Checkout repository
@@ -33,10 +32,11 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           
-          # CRITICAL FIX: Removed comments inside the block scalar (|) for clean parsing.
+          # CRITICAL FIX: Clean formatting with the branch tag rule removed
           tags: | 
+            # Tag with the short commit SHA (e.g., ddf99a2)
             type=sha,prefix=,suffix=,format=short
-            type=branch,enable=${{ github.ref == 'refs/heads/main' }},priority=700,event=push
+            # Tag with 'latest' only if the commit is on the main branch
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push Docker image
